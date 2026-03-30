@@ -1,0 +1,81 @@
+/* FrameTap Brand Colors */
+:root {
+  --frametap-brand: #D0391C;
+  --frametap-brand-light: #E38877;
+  --frametap-brand-dark: #A62E16;
+}
+
+/* Override VitePress brand colors */
+:root {
+  --vp-c-brand-1: var(--frametap-brand);
+  --vp-c-brand-2: var(--frametap-brand-light);
+  --vp-c-brand-3: var(--frametap-brand-dark);
+  --vp-c-brand-soft: rgba(208, 57, 28, 0.14);
+}
+
+/* Sidebar link colors */
+.VPSidebarItem.is-link .item a {
+  color: var(--vp-c-text-2);
+}
+
+.VPSidebarItem.is-link .item a:hover {
+  color: var(--frametap-brand);
+}
+
+.VPSidebarItem.is-active .item a {
+  color: var(--frametap-brand) !important;
+}
+
+/* Next/Prev page links */
+.VPDocFooter .pager-link:hover .title {
+  color: var(--frametap-brand);
+}
+
+.VPDocFooter .pager-link:hover .desc {
+  color: var(--frametap-brand-light);
+}
+
+/* LLMS Copy Buttons */
+.llms-copy-buttons {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 12px;
+  background-color: var(--vp-c-bg-soft);
+  border-radius: 8px;
+  border: 1px solid var(--vp-c-divider);
+}
+
+.llms-copy-btn,
+.llms-download-btn {
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--vp-c-divider);
+  background-color: var(--vp-c-bg);
+  color: var(--vp-c-text-1);
+}
+
+.llms-copy-btn:hover,
+.llms-download-btn:hover {
+  background-color: var(--vp-c-bg-mute);
+  border-color: var(--frametap-brand);
+  color: var(--frametap-brand);
+}
+
+.llms-copy-btn:active,
+.llms-download-btn:active {
+  transform: scale(0.98);
+}
+
+/* Nav bar active link */
+.VPNavBarMenuLink.active {
+  color: var(--frametap-brand) !important;
+}
+
+.VPNavBarMenuLink:hover {
+  color: var(--frametap-brand) !important;
+}
