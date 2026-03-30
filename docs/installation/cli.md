@@ -10,32 +10,7 @@ The Frametap CLI (`frametap`) is a Go-based tool that runs on your machines to c
 curl -fsSL https://cli.frametap.io/install | bash
 ```
 
-## Manual Installation
-
-### From Source
-
-**Requirements:**
-- Go 1.25+
-- ffmpeg and ffprobe on PATH
-- Linux: `wmctrl` for window listing
-
-**Build:**
-```bash
-git clone https://github.com/frametap/cli.git
-cd cli
-mkdir -p dist
-go build -o dist/frametap ./cmd/cli
-go build -o dist/frametapd ./cmd/daemon
-```
-
-**Install:**
-```bash
-# Move to PATH
-sudo mv dist/frametap /usr/local/bin/
-sudo mv dist/frametapd /usr/local/bin/
-```
-
-### Docker Image
+## Docker Image
 
 ```bash
 docker pull frametap/frametap-cli:latest
