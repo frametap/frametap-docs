@@ -1,97 +1,91 @@
 # Frametap Documentation
 
-Welcome to the Frametap documentation. Frametap is an API-controlled screen capture platform that lets you capture screenshots, screen recordings, and file uploads from sandboxes, containers, VMs, and remote machines.
+Frametap lets you capture screenshots, screen recordings, and file uploads from sandboxes, containers, VMs, and remote machines.
 
 ## What is Frametap?
 
-Frametap enables developers to programmatically capture visual artifacts from any machine where the Frametap CLI runner is installed. Whether you're debugging CI/CD pipelines, monitoring AI agent workflows, or managing remote infrastructure, Frametap brings back visual proof of what happened.
+Frametap installs a runner on the machine you care about, then lets you trigger jobs from the app, the public API, or the CLI. The results come back to the app as recordings, screenshots, and uploaded files.
+
+## Start Here
+
+- Use the app: [frametap.io/app](https://frametap.io/app)
+- Use the API reference: [api-reference.frametap.io](https://api-reference.frametap.io/)
 
 ## How it works
 
 ```
-Install runner → Trigger via API/CLI → Review artifacts in dashboard
+Install runner → Trigger jobs → Review artifacts in the app
 ```
 
 1. **Install the Frametap CLI** on your machine, container, or VM
 2. **Enroll the runner** with an enrollment token
-3. **Trigger captures** via API calls or CLI commands
-4. **Review artifacts** in the web dashboard with timeline view
+3. **Trigger jobs** from the app, public API, or CLI commands
+4. **Review artifacts** in the web app
 
 ## Core Capabilities
 
 ### Screenshots
-Capture single frames from any display with API calls. Returns signed URLs for immediate download.
+Capture single frames from any enrolled display.
 
-- Single display or window capture
+- On-demand screenshots
 - Scheduled screenshots
-- Metadata extraction (dimensions, format)
+- Organized in the dashboard with metadata
 
 ### Screen Recordings
-Record video from any display with flexible stop conditions:
+Record video from any enrolled display.
 
-- Duration-based (record for N seconds)
+- Duration-based recordings
 - Manual interrupt
-- Selenium idle detection (stops when browser is idle)
+- Selenium-aware stop conditions for browser automation
 
 ### Watch Folder Uploads
-Monitor directories for new files and auto-upload with checksum deduplication:
+Watch a directory and upload files automatically.
 
-- Auto-detect file types (image, video, document, other)
-- Metadata extraction (dimensions, codec, duration)
-- Deduplication via SHA256 checksum
-- Glob pattern exclusions
+- Good for test artifacts, exports, logs, and generated files
+- Built-in deduplication
+- Include and exclude pattern support
 
 ## Common Use Cases
 
-### Remote Sandboxes & VMs
-Install the runner once, then trigger captures from anywhere through API calls. Perfect for debugging ephemeral environments.
+### Remote Sandboxes and VMs
+Install the runner once, then trigger captures remotely whenever you need visual proof.
 
 ### AI Agent Workflows
-When agents run code in isolated environments, Frametap brings back visual artifacts so humans can review what happened.
+Capture what an agent actually rendered or produced in its sandbox.
 
 ### CI/CD Debugging
-Record browser sessions in pipelines and inspect exactly what happened when tests fail in headless environments. Works with Selenium, Playwright, and Puppeteer.
+Record browser runs and collect output files so failures are easier to inspect.
 
 ### Artifact Management
-Auto-upload, dedupe, and organize screenshots, videos, and logs in one searchable timeline.
+Keep screenshots, recordings, and uploaded files in one timeline.
 
-## Architecture Overview
+## Ways to Use Frametap
 
-Frametap consists of three main components:
+### Dashboard
+Create jobs manually, inspect artifacts, manage keys and billing, and monitor runners.
 
-### CLI Runner (frametap)
-Go-based daemon that runs on target machines:
-- Captures screenshots and recordings via ffmpeg
-- Monitors watch folders
-- Communicates with backend via WebSocket
-- Handles file uploads with presigned URLs
+### Public API
+Integrate Frametap into CI, automation, and custom tooling.
 
-### Backend API
-FastAPI service for orchestration:
-- Job management and scheduling
-- Runner registration and heartbeat
-- Authentication and billing
-- Document storage and retrieval
-
-### Web Dashboard
-Vue.js interface for management:
-- View recordings, screenshots, and files
-- Manage runners and jobs
-- Real-time status via WebSocket
-- Credit-based billing management
+### CLI Runner
+Manage the local runner, enable auto-recording, and watch folders directly from the command line.
 
 ## Getting Started
 
-Check out the [Quick Start guide](/overview/quick-start) to get up and running in minutes, or dive into specific sections:
+Start with one of these:
 
+- [Quick Start](/overview/quick-start)
+- [Using the App](/overview/app)
 - [Install the CLI](/installation/cli)
 - [Docker setup](/installation/docker)
 - [CLI commands reference](/cli/commands)
-- [Job types](/jobs/types)
+- [API overview](/api/overview)
+- [Interactive API reference](/reference/api-spec)
 
 ## Support
 
-- **Documentation**: You're looking at it!
-- **API Reference**: [frametap.io/api](https://frametap.io/api)
-- **Status Page**: [status.frametap.io](https://status.frametap.io)
+- **Documentation**: You're looking at it
+- **Open App**: [frametap.io/app](https://frametap.io/app)
+- **API Reference**: [api-reference.frametap.io](https://api-reference.frametap.io/)
+- **OpenAPI Spec**: [api-reference.frametap.io/openapi.json](https://api-reference.frametap.io/openapi.json)
 - **Email**: hello@frametap.io

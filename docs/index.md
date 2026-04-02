@@ -2,6 +2,8 @@
 
 API controlled screen capture from sandboxes, containers, VMs, and remote machines.
 
+> Start in the app at [frametap.io/app](https://frametap.io/app) and use the full API reference at [api-reference.frametap.io](https://api-reference.frametap.io/).
+
 ## Getting Started
 
 <div class="grid grid-cols-2 gap-4">
@@ -11,74 +13,83 @@ API controlled screen capture from sandboxes, containers, VMs, and remote machin
     <a href="/overview/quick-start" class="button">Get Started →</a>
   </div>
   <div class="p-4 border rounded">
+    <h3>Open App</h3>
+    <p>Enroll runners, create jobs, and review artifacts in the UI</p>
+    <a href="https://frametap.io/app" class="button">Open App →</a>
+  </div>
+  <div class="p-4 border rounded">
     <h3>Install CLI</h3>
-    <p>Install the Frametap CLI on your machines</p>
+    <p>Install the Frametap runner on your machines</p>
     <a href="/installation/cli" class="button">Install →</a>
   </div>
   <div class="p-4 border rounded">
-    <h3>CLI Reference</h3>
-    <p>Complete CLI command reference</p>
-    <a href="/cli/commands" class="button">Reference →</a>
-  </div>
-  <div class="p-4 border rounded">
-    <h3>API Docs</h3>
-    <p>Full API specification with examples</p>
-    <a href="/api/overview" class="button">API →</a>
+    <h3>API Reference</h3>
+    <p>Interactive API docs and the OpenAPI spec</p>
+    <a href="https://api-reference.frametap.io/" class="button">API →</a>
   </div>
 </div>
 
 ## What is Frametap?
 
-Frametap enables you to programmatically capture:
+Frametap helps you capture and review what actually happened on remote machines:
 
-- **Screenshots** - Single frame captures from any display
-- **Screen Recordings** - Video capture with flexible stop conditions
-- **File Uploads** - Watch folder monitoring with auto-upload
+- **Screenshots** from any enrolled display
+- **Recordings** with duration, interrupt, or Selenium-aware stop conditions
+- **File uploads** from watched artifact folders
 
 ## How it works
 
 ```
-Install runner → Trigger via API/CLI → Review artifacts in dashboard
+Install runner → Trigger from app, API, or CLI → Review artifacts in the app
 ```
 
-1. **Install** the Frametap CLI on your machine
-2. **Enroll** the runner with a token
-3. **Trigger** captures via API or auto-record
-4. **Review** in the web dashboard
+1. **Install** the Frametap CLI on the machine that should capture or upload files
+2. **Enroll** that machine as a runner
+3. **Trigger** jobs from the app, public API, or CLI
+4. **Review** recordings, screenshots, and uploaded files in Frametap
 
 ## Use Cases
 
 - **CI/CD Pipelines** - Record browser tests for debugging
 - **AI Agents** - Capture visual proof from sandboxed runs
-- **Remote Debugging** - Capture from production servers
-- **Automated Monitoring** - Scheduled screenshots
+- **Remote Debugging** - Capture from production-like environments
+- **Automated Monitoring** - Schedule screenshots and collect artifacts
 
 ## Quick Example
 
 ```bash
-# Install
-curl -fsSL https://cli.frametap.io/install | bash
+# Install the runner
+curl -fsSL https://cli.static.frametap.io/install | bash
 
-# Enroll
+# Enroll the machine
 frametap up --token ft_enrollment_xxxxxxxxxxxxxxxxx
 
-# Create recording via API
-curl -X POST https://api.frametap.io/v1/jobs \
-  -H "Authorization: Bearer $API_KEY" \
+# Create a recording job via API
+export FRAMETAP_API_KEY=ft_api_xxxxxxxxxxxxxxxxx
+export FRAMETAP_ORG_ID=123
+
+curl -X POST "https://api.frametap.io/v1/jobs?organizationId=$FRAMETAP_ORG_ID" \
+  -H "Authorization: Bearer $FRAMETAP_API_KEY" \
+  -H "Content-Type: application/json" \
   -d '{
     "runnerId": 123,
+    "displayId": "0",
     "type": "recording",
     "stopCondition": "duration",
     "stopConditionConfig": {"durationSeconds": 60}
   }'
+
+# Or watch an artifact folder from the CLI
+frametap watch start --dir /app/artifacts
 ```
 
 ## Documentation Sections
 
 ### [Overview](/overview/)
-- What is Frametap
-- Core capabilities
-- Architecture
+- What Frametap does
+- Customer workflow
+- Quick start
+- Using the app
 
 ### [Installation](/installation/cli)
 - Install CLI
@@ -99,8 +110,7 @@ curl -X POST https://api.frametap.io/v1/jobs \
 ### [API](/api/overview)
 - API overview
 - Authentication
-- Endpoints
-- WebSocket
+- Interactive API reference
 
 ### [Platform](/platform/runners)
 - Runners
@@ -110,13 +120,14 @@ curl -X POST https://api.frametap.io/v1/jobs \
 
 ## Resources
 
-- **API Reference**: [frametap.io/api](https://frametap.io/api)
-- **Status Page**: [status.frametap.io](https://status.frametap.io)
+- **Open App**: [frametap.io/app](https://frametap.io/app)
+- **API Reference**: [api-reference.frametap.io](https://api-reference.frametap.io/)
+- **OpenAPI Spec**: [api-reference.frametap.io/openapi.json](https://api-reference.frametap.io/openapi.json)
 - **Support**: hello@frametap.io
 
 ## Contributing
 
-Found an issue or have a suggestion? 
+Found an issue or have a suggestion?
 
 - Report issues on [GitHub](https://github.com/frametap)
 - Email: hello@frametap.io

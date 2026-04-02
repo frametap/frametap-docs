@@ -6,7 +6,7 @@ Auto-record mode automatically starts recording when the Frametap runner starts 
 
 When `FRAMETAP_AUTO_RECORD=true` is set:
 
-1. Runner connects to backend
+1. Runner starts and checks in with Frametap
 2. Recording job is created automatically
 3. Recording starts immediately
 4. Stops based on configured condition
@@ -28,7 +28,7 @@ frametap up
 ```yaml
 services:
   frametap:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
     environment:
       - FRAMETAP_TOKEN=${FRAMETAP_TOKEN}
       - FRAMETAP_AUTO_RECORD=true
@@ -57,114 +57,31 @@ export FRAMETAP_JOB_NAME="Selenium Test Run"
 - Records continuously
 - Monitors Selenium Grid status
 - Stops when no active sessions for 5 seconds
-- Perfect for Selenium/Playwright/Puppeteer tests
-
-### Duration-Based
-
-For fixed-length recordings:
-
-```bash
-# Not directly supported via env vars
-# Use API call instead:
-curl -X POST https://api.frametap.io/v1/jobs \
-  -H "Authorization: Bearer $API_KEY" \
-  -d '{
-    "type": "recording",
-    "runnerId": 123,
-    "stopCondition": "duration",
-    "stopConditionConfig": {
-      "durationSeconds": 300
-    }
-  }'
-```
+- Perfect for Selenium tests
 
 ### Manual Interrupt
 
-For manual control:
+If you start an auto-recording without `SE_GRID_URL`, it uses manual interrupt and keeps recording until you stop the job.
 
 ```bash
 export FRAMETAP_AUTO_RECORD=true
 # Don't set SE_GRID_URL
 ```
 
-Then cancel via API:
+You can stop it in two ways:
+
+1. Via API:
+
 ```bash
-curl -X POST https://api.frametap.io/v1/jobs/123/cancel \
-  -H "Authorization: Bearer $API_KEY"
+curl -X POST "https://api.frametap.io/v1/jobs/123/cancel?organizationId=$FRAMETAP_ORG_ID" \
+  -H "Authorization: Bearer $FRAMETAP_API_KEY"
 ```
 
-## CI/CD Integration
+2. In the app UI:
 
-### GitHub Actions
-
-```yaml
-name: Visual Tests
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Start services
-        env:
-          FRAMETAP_TOKEN: ${{ secrets.FRAMETAP_TOKEN }}
-          FRAMETAP_AUTO_RECORD: "true"
-          FRAMETAP_JOB_NAME: "PR #${{ github.event.number }}"
-        run: |
-          docker compose -f docker-compose.test.yml up --abort-on-container-exit
-      
-      - name: Link to recording
-        if: always()
-        run: |
-          echo "Recording available at: https://frametap.io/recordings"
-          echo "Look for job: PR #${{ github.event.number }}"
-```
-
-### GitLab CI
-
-```yaml
-visual-test:
-  stage: test
-  image: docker:latest
-  services:
-    - docker:dind
-  variables:
-    FRAMETAP_TOKEN: $FRAMETAP_TOKEN
-    FRAMETAP_AUTO_RECORD: "true"
-    FRAMETAP_JOB_NAME: "$CI_COMMIT_REF_NAME"
-  script:
-    - docker compose -f docker-compose.test.yml up --abort-on-container-exit
-  artifacts:
-    reports:
-      junit: test-results.xml
-```
-
-### Jenkins
-
-```groovy
-pipeline {
-    agent any
-    environment {
-        FRAMETAP_TOKEN = credentials('frametap-token')
-        FRAMETAP_AUTO_RECORD = 'true'
-        FRAMETAP_JOB_NAME = "${env.BUILD_TAG}"
-    }
-    stages {
-        stage('Test') {
-            steps {
-                sh 'docker compose -f docker-compose.test.yml up --abort-on-container-exit'
-            }
-        }
-    }
-    post {
-        always {
-            echo "Check https://frametap.io/recordings for: ${env.BUILD_TAG}"
-        }
-    }
-}
-```
+- open [Jobs](https://frametap.io/app/jobs)
+- click the `...` action for the running job to open the drawer
+- click the cancel button at the top of the drawer
 
 ## Multi-Stage Recordings
 
@@ -208,57 +125,6 @@ run_checkout_tests()
 stop_phase(phase2_id)
 ```
 
-## Best Practices
-
-### 1. Use Descriptive Job Names
-
-Include context in job names:
-
-```bash
-FRAMETAP_JOB_NAME="${CI_COMMIT_REF_NAME} - ${CI_JOB_NAME}"
-```
-
-### 2. Persist Runner Data
-
-Always mount a volume:
-
-```yaml
-volumes:
-  - frametap-data:/home/frametap/.config/frametap
-```
-
-This prevents duplicate registrations and preserves checksums.
-
-### 3. Set Appropriate Window Size
-
-For consistent recordings:
-
-```python
-# In your Selenium test
-options.add_argument("--window-size=1280,720")
-options.add_argument("--window-position=0,0")
-```
-
-### 4. Handle Failures Gracefully
-
-Use `--abort-on-container-exit` to ensure all logs are captured:
-
-```bash
-docker compose -f test.yml up --abort-on-container-exit
-```
-
-### 5. Link to Recordings in CI
-
-Always print the dashboard URL:
-
-```yaml
-- name: Recording link
-  if: always()
-  run: |
-    echo "📹 Recording: https://frametap.io/recordings"
-    echo "🔍 Job: $FRAMETAP_JOB_NAME"
-```
-
 ## Troubleshooting
 
 ### Recording doesn't start
@@ -267,6 +133,7 @@ Always print the dashboard URL:
 - FRAMETAP_AUTO_RECORD is set to `true`
 - FRAMETAP_TOKEN is valid
 - Runner is enrolled: `frametap status`
+- Stop any previous auto-record session first with `frametap down`, then start the runner again
 
 ### Recording doesn't stop
 

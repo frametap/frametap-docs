@@ -3,6 +3,13 @@
   --frametap-brand: #D0391C;
   --frametap-brand-light: #E38877;
   --frametap-brand-dark: #A62E16;
+  --vp-c-bg: #0f0f0f;
+  --vp-c-bg-alt: #0f0f0f;
+}
+
+.VPNavBarTitle .logo {
+  height: 18px;
+  width: auto;
 }
 
 /* Override VitePress brand colors */

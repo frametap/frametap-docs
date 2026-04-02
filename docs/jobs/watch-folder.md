@@ -33,7 +33,7 @@ frametap up
 ```yaml
 services:
   frametap:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
     environment:
       - FRAMETAP_TOKEN=${FRAMETAP_TOKEN}
       - FRAMETAP_WATCH_DIR=/app/output
@@ -84,41 +84,10 @@ export FRAMETAP_WATCH_EXCLUDE="[*.tmp, *.log, .DS_Store]"
 
 JSON array format with glob patterns.
 
-## How It Works
-
-```mermaid
-sequenceDiagram
-    participant FS as File System
-    participant W as Watcher
-    participant CD as Checksum DB
-    participant API as Backend API
-    
-    loop File Events
-        FS->>W: Create/Write event
-        W->>W: 2s debounce
-        W->>W: Apply exclude patterns
-        W->>W: Compute SHA256
-        W->>CD: Check duplicate
-        alt Not duplicate
-            W->>W: Extract metadata
-            W->>API: file_appeared event
-            API->>W: Upload instructions
-            W->>API: Upload file
-            API->>CD: Store checksum
-        end
-    end
-```
-
-### Event Debouncing
-
-- Files must be stable for 2 seconds before processing
-- Prevents uploading incomplete files
-- Multiple rapid changes are collapsed into one event
-
 ### Checksum Deduplication
 
 - SHA256 computed for each file
-- Checksums stored in `checksums.json`
+- Checksums stored in `watch-checksums.json`
 - Persists across daemon restarts
 - Files with same checksum are skipped
 
@@ -132,6 +101,20 @@ The runner automatically detects file types:
 | **Video** | .mp4, .mov, .avi, .webm | Width, height, codec, duration, hasAudio |
 | **Document** | .pdf, .doc, .docx, .txt, .md | MIME type, size |
 | **Other** | Any | Size only |
+
+## Upload Size Limits
+
+Watch-folder uploads are subject to the file-size limit for your plan.
+
+| Plan | Max file size |
+|------|----------------|
+| Free | 100 MB |
+| Dev | 5 GB |
+| Pro | 15 GB |
+
+Files larger than your plan limit are skipped.
+
+If this happens, Frametap shows a notification in the app when the upload is triggered.
 
 ## Status Commands
 
@@ -163,30 +146,7 @@ When the watcher starts:
 1. Scans all existing files in the directory
 2. Processes each file (dedup, metadata, upload)
 3. Then starts monitoring for new events
-4. Backend deduplication prevents duplicates even on fresh starts
-
-## WebSocket Events
-
-The runner sends events to the backend:
-
-```json
-{
-  "feature": "watch",
-  "message": "file_appeared",
-  "payload": {
-    "path": "/app/output/screenshot.png",
-    "checksum": "abc123...",
-    "size": 1024567,
-    "fileType": "image",
-    "contentType": "image/png",
-    "metadata": {
-      "width": 1920,
-      "height": 1080
-    },
-    "detectedAt": "2026-03-28T10:30:00Z"
-  }
-}
-```
+4. Frametap deduplication prevents duplicates even on fresh starts
 
 ## Examples
 
@@ -202,7 +162,7 @@ services:
       - ./output:/app/output
   
   frametap:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
     environment:
       - FRAMETAP_TOKEN=${FRAMETAP_TOKEN}
       - FRAMETAP_WATCH_DIR=/app/output
@@ -251,7 +211,7 @@ Run multiple runners for different directories:
 ```yaml
 services:
   frametap-screenshots:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
     environment:
       - FRAMETAP_TOKEN=${FRAMETAP_TOKEN}
       - FRAMETAP_HOSTNAME=screenshot-runner
@@ -261,7 +221,7 @@ services:
       - frametap-data-ss:/home/frametap/.config/frametap
 
   frametap-logs:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
     environment:
       - FRAMETAP_TOKEN=${FRAMETAP_TOKEN}
       - FRAMETAP_HOSTNAME=log-runner
@@ -287,16 +247,18 @@ echo $FRAMETAP_WATCH_DIR  # Should start with /
 docker compose logs frametap
 ```
 
+Also check whether the file exceeds the upload limit for your plan. If it does, Frametap shows a notification in the app when the upload is triggered.
+
 ### Duplicate uploads
 
 Check checksum database:
 ```bash
-cat ~/.local/share/frametap/checksums.json
+cat ~/.config/frametap/watch-checksums.json
 ```
 
 Clear if needed:
 ```bash
-rm ~/.local/share/frametap/checksums.json
+rm ~/.config/frametap/watch-checksums.json
 ```
 
 ### Permission denied

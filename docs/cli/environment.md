@@ -141,7 +141,7 @@ Glob patterns to exclude from watching.
 export FRAMETAP_WATCH_EXCLUDE="[*.log, *.tmp, node_modules/**]"
 ```
 
-**Format:** JSON array string of glob patterns
+**Format:** comma-separated or bracketed glob list
 
 **Default:** None
 
@@ -156,13 +156,14 @@ export FRAMETAP_DAEMON_DATA_DIR=/var/lib/frametap
 ```
 
 **Default:** 
-- Linux: `~/.local/share/frametap`
+- Linux: `~/.config/frametap`
 - macOS: `~/Library/Application Support/frametap`
 
 **Contains:**
 - `runner.json` - Runner registration
-- `watcher.json` - Watch folder config
-- `checksums.json` - Deduplication database
+- `daemon.sock` - Local CLI socket
+- `frametapd.log` - Daemon log output
+- `watch-checksums.json` - Watch-folder deduplication database
 
 ### `FRAMETAP_DAEMON_SOCKET_PATH`
 
@@ -173,15 +174,14 @@ export FRAMETAP_DAEMON_SOCKET_PATH=/run/frametap.sock
 ```
 
 **Default:** 
-- Linux: `/run/user/{uid}/frametap.sock`
-- macOS: `/var/run/frametap.sock`
+- Linux and macOS: `{FRAMETAP_DAEMON_DATA_DIR}/daemon.sock`
 
 ## Complete Docker Example
 
 ```yaml
 services:
   frametap:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
     environment:
       # Required
       - FRAMETAP_TOKEN=ft_enrollment_xxxxxxxxxxxxxxxxx
@@ -230,7 +230,7 @@ Load it:
 source .env
 
 # Option 2: Use with Docker
-docker run --env-file .env frametap/frametap-cli:latest
+docker run --env-file .env frametap/frametap:latest
 
 # Option 3: Use with docker-compose
 docker compose --env-file .env up

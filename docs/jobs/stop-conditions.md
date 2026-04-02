@@ -84,10 +84,20 @@ curl -X POST https://api.frametap.io/v1/jobs \
 
 ### Stopping the Job
 
+You can stop an interrupt-based recording in two ways:
+
+1. Via API:
+
 ```bash
-curl -X POST https://api.frametap.io/v1/jobs/123/cancel \
-  -H "Authorization: Bearer $API_KEY"
+curl -X POST "https://api.frametap.io/v1/jobs/123/cancel?organizationId=$FRAMETAP_ORG_ID" \
+  -H "Authorization: Bearer $FRAMETAP_API_KEY"
 ```
+
+2. In the app UI:
+
+- open [Jobs](https://frametap.io/app/jobs)
+- click the `...` action for the running job to open the drawer
+- click the cancel button at the top of the drawer
 
 ### Use Cases
 
@@ -196,7 +206,7 @@ With auto-record, this happens automatically:
 ```yaml
 services:
   frametap:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
     environment:
       - FRAMETAP_TOKEN=${FRAMETAP_TOKEN}
       - FRAMETAP_AUTO_RECORD=true
@@ -228,7 +238,7 @@ services:
       - "6099:6099"
 
   frametap:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
     environment:
       - FRAMETAP_TOKEN=${FRAMETAP_TOKEN}
       - FRAMETAP_AUTO_RECORD=true

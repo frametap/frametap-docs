@@ -2,8 +2,11 @@ import { defineConfig } from 'vitepress'
 import llmstxt, { copyOrDownloadAsMarkdownButtons } from 'vitepress-plugin-llms'
 
 export default defineConfig({
-  title: 'Frametap Docs',
+  title: 'Docs',
   description: 'API controlled screen capture from sandboxes, containers, and VMs',
+  head: [
+    ['link', { rel: 'icon', href: '/favicon.svg' }]
+  ],
   vite: {
     plugins: [llmstxt()]
   },
@@ -17,7 +20,8 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Documentation', link: '/overview/' },
-      { text: 'API Reference', link: 'https://frametap.io/api' }
+      { text: 'Open App', link: 'https://frametap.io/app' },
+      { text: 'API Reference', link: 'https://api-reference.frametap.io/' }
     ],
     sidebar: [
       {
@@ -26,7 +30,7 @@ export default defineConfig({
         items: [
           { text: 'Overview', link: '/overview/' },
           { text: 'Quick Start', link: '/overview/quick-start' },
-          { text: 'Architecture', link: '/overview/architecture' }
+          { text: 'Using the App', link: '/overview/app' }
         ]
       },
       {
@@ -53,8 +57,7 @@ export default defineConfig({
         items: [
           { text: 'Job Types', link: '/jobs/types' },
           { text: 'Stop Conditions', link: '/jobs/stop-conditions' },
-          { text: 'Watch Folder', link: '/jobs/watch-folder' },
-          { text: 'Examples', link: '/jobs/examples' }
+          { text: 'Watch Folder', link: '/jobs/watch-folder' }
         ]
       },
       {
@@ -63,8 +66,7 @@ export default defineConfig({
         items: [
           { text: 'API Overview', link: '/api/overview' },
           { text: 'Authentication', link: '/api/authentication' },
-          { text: 'Endpoints', link: '/api/endpoints' },
-          { text: 'WebSocket Protocol', link: '/api/websocket' }
+          { text: 'API Reference', link: '/reference/api-spec' }
         ]
       },
       {
@@ -72,7 +74,6 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: 'Runners', link: '/platform/runners' },
-          { text: 'Projects', link: '/platform/projects' },
           { text: 'Documents', link: '/platform/documents' },
           { text: 'Billing', link: '/platform/billing' }
         ]
@@ -81,13 +82,13 @@ export default defineConfig({
         text: 'Reference',
         collapsed: false,
         items: [
-          { text: 'API Specification', link: '/reference/api-spec' }
+          { text: 'API Reference', link: '/reference/api-spec' }
         ]
       }
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/frametap' },
-      { icon: 'x', link: 'https://x.com/frametap' }
+      { icon: 'github', link: 'https://github.com/frametap' }
+      // { icon: 'x', link: 'https://x.com/frametap' }
     ],
     footer: {
       message: 'Released under the MIT License.',

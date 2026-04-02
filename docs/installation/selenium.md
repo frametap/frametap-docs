@@ -19,6 +19,7 @@ version: '3.8'
 services:
   selenium:
     image: selenium/standalone-chrome:latest
+    platform: linux/amd64
     shm_size: 2gb
     environment:
       - SE_NODE_MAX_SESSIONS=1
@@ -33,13 +34,17 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+      start_period: 10s
 
   frametap:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
+    env_file:
+      - .env
     environment:
       - FRAMETAP_TOKEN=${FRAMETAP_TOKEN}
       - FRAMETAP_AUTO_RECORD=true
-      - FRAMETAP_JOB_NAME=Selenium CI Test
+      - 'FRAMETAP_JOB_NAME=${FRAMETAP_JOB_NAME:-selenium CI: Email Validation Failure Recording}'
+      - FRAMETAP_HOSTNAME=${FRAMETAP_HOSTNAME:-selenium CI}
       - SE_GRID_URL=http://selenium:4444
       - DISPLAY=selenium:99
     depends_on:
@@ -47,15 +52,20 @@ services:
     volumes:
       - frametap-data:/home/frametap/.config/frametap
 
-  test:
+  selenium-test:
     build:
       context: .
-      dockerfile: Dockerfile.test
+      dockerfile: Dockerfile.selenium
     environment:
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
+      - SELENIUM_DEMO_RUNNER_NAME=${FRAMETAP_HOSTNAME:-selenium CI}
     depends_on:
       selenium:
         condition: service_healthy
+      frametap:
+        condition: service_started
+    volumes:
+      - ./:/tests
     command: ["python", "selenium_test.py"]
 
 volumes:
@@ -138,7 +148,7 @@ CMD ["python", "selenium_test.py"]
 
 When `FRAMETAP_AUTO_RECORD=true`, the runner:
 
-1. **Starts on boot**: Begins recording immediately after connecting to backend
+1. **Starts on boot**: Begins recording as soon as the runner starts
 2. **Monitors Selenium**: Uses the Grid API to detect active sessions
 3. **Auto-stops**: When Selenium has no active sessions for 5 seconds
 4. **Uploads**: Automatically uploads the recording to the dashboard
@@ -218,7 +228,7 @@ jobs:
       - name: Upload artifacts link
         if: failure()
         run: |
-          echo "View recording at: https://frametap.io/recordings"
+          echo "View recording at: https://frametap.io/app/recordings"
 ```
 
 ### GitLab CI

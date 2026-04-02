@@ -15,43 +15,23 @@ Credits are consumed when:
 |--------|---------|
 | 1 screenshot | 1 credit |
 | 10 seconds of video | 1 credit |
-| 1 file upload (50 MB) | 1 credit |
+| 1 file upload | At least 1 credit, then rounded up by 50 MB |
 
 ### Examples
 
 - A 5-minute recording = 30 credits (300 seconds ÷ 10)
 - 50 screenshots = 50 credits
-- 200 MB of files = 4 credits (200 ÷ 50)
+- A 30 MB file = 1 credit
+- A 70 MB file = 2 credits
+- A 200 MB file = 4 credits
 
 ## Plans
 
-### Free
-
-- **Price**: $0/month
-- **Credits**: 30/month
-- **Storage**: 7-day retention
-- **Max file size**: 100 MB
-- **Projects**: 3
-- **Runners**: 1
-
-### Dev
-
-- **Price**: $10/month
-- **Credits**: 300/month (~300 screenshots, 50 min video)
-- **Storage**: 30-day retention
-- **Max file size**: 5 GB
-- **Projects**: 10
-- **Runners**: Unlimited
-
-### Pro
-
-- **Price**: $20/month
-- **Credits**: 1000/month
-- **Storage**: 60-day retention
-- **Max file size**: 15 GB
-- **Projects**: Unlimited
-- **Runners**: Unlimited
-- **Credit packs**: Available
+| Plan | Price | Credits | Storage | Max file size | Runners | Credit packs |
+|------|-------|---------|---------|---------------|---------|--------------|
+| Free | $0/month | 30/month | 7-day retention | 100 MB | Unlimited | No |
+| Dev | $10/month | 300/month (~300 screenshots, 50 min video) | 30-day retention | 5 GB | Unlimited | Yes |
+| Pro | $20/month | 1000/month | 60-day retention | 15 GB | Unlimited | Yes |
 
 ## Credit Packs
 
@@ -63,143 +43,44 @@ Purchase additional credits that never expire:
 | Medium | 600 | $24 |
 | Large | 1500 | $45 |
 
-Buy credit packs from the dashboard or via API:
-
-```bash
-curl -X POST https://api.frametap.io/v1/billing/credits \
-  -H "Authorization: Bearer $API_KEY" \
-  -d '{
-    "productId": "credit-pack-medium",
-    "quantity": 1
-  }'
-```
+Buy credit packs from [Settings → Billing](https://frametap.io/app/settings/billing).
 
 ## Checking Credits
 
 ### Via Dashboard
 
-Go to [frametap.io/billing](https://frametap.io/billing) to see:
+Go to [Settings → Billing](https://frametap.io/app/settings/billing) to see:
 - Current credit balance
 - Usage this month
 - Credit history
 
 ### Via API
 
-```bash
-curl https://api.frametap.io/v1/users/me/credits \
-  -H "Authorization: Bearer $API_KEY"
-```
+If you need the remaining credits programmatically, use the billing endpoints in the API reference:
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "credits": 284,
-    "monthlyCredits": 300,
-    "usedThisMonth": 16,
-    "creditPacks": 50
-  }
-}
-```
+- [Billing endpoints](https://api-reference.frametap.io/#tag/billing)
 
 ## Managing Subscription
 
-### Change Plan
+Use [Settings → Billing](https://frametap.io/app/settings/billing) to open the Stripe customer portal.
 
-Upgrade or downgrade via the dashboard:
+From there, users can:
 
-1. Go to Settings → Billing
-2. Select new plan
-3. Confirm change
+- change plan
+- update the credit card on file
+- manage billing details
+- cancel the subscription
+- download invoices
 
-Or via API:
-
-```bash
-curl -X POST https://api.frametap.io/v1/billing/subscription \
-  -H "Authorization: Bearer $API_KEY" \
-  -d '{"planId": "pro"}'
-```
-
-### Cancel Subscription
-
-Cancel at any time from the dashboard. Your subscription remains active until the end of the billing period.
-
-### Manage Payment
-
-Update payment methods:
-
-```bash
-# Get Stripe portal URL
-curl https://api.frametap.io/v1/billing/subscription/manage \
-  -H "Authorization: Bearer $API_KEY"
-```
-
-## Usage Optimization
-
-### 1. Use Screenshots for Short Captures
-
-Screenshots cost less than video:
-- 1 screenshot = 1 credit
-- 10 seconds of video = 1 credit
-
-### 2. Optimize Recording Duration
-
-Use `selenium_idle` stop condition to avoid recording idle time:
-
-```bash
-# Instead of fixed 5-minute recording (30 credits)
-curl -X POST /v1/jobs \
-  -d '{
-    "stopCondition": "selenium_idle",
-    "stopConditionConfig": {"gridUrl": "http://selenium:4444"}
-  }'
-```
-
-### 3. Exclude Unnecessary Files
-
-Filter watch folder uploads:
-
-```bash
-frametap watch start \
-  --dir /app/output \
-  --exclude "*.log" \
-  --exclude "*.tmp"
-```
-
-### 4. Monitor Usage
-
-Track usage patterns:
-
-```bash
-# List jobs this month
-curl "https://api.frametap.io/v1/jobs?createdAfter=2026-03-01" \
-  -H "Authorization: Bearer $API_KEY" \
-  | jq '.data.items | group_by(.type) | map({type: .[0].type, count: length})'
-```
-
-## Billing Alerts
-
-Set up alerts in the dashboard to notify when:
-- Credits are running low
-- Monthly quota is 80% consumed
-- Unusual usage detected
-
-## Invoices
-
-Download invoices from the dashboard:
-
-1. Go to Settings → Billing
-2. Click "Invoices"
-3. Download PDF
+If a subscription is cancelled, it remains active until the end of the current billing period.
 
 ## FAQ
 
 **What happens when I run out of credits?**
-Jobs will fail with "insufficient credits" error. Purchase a credit pack or upgrade your plan.
+Jobs will fail with an insufficient credits error.
 
 **Do credits roll over?**
-Monthly credits do not roll over. Credit pack credits never expire.
+Monthly credits do not roll over. Credit pack credits expire after 12 months.
 
 **Can I get a refund?**
 Contact support for refund requests within 14 days of purchase.
@@ -208,4 +89,4 @@ Contact support for refund requests within 14 days of purchase.
 We accept all major credit cards via Stripe.
 
 **Is there an enterprise plan?**
-Yes, contact sales@frametap.io for custom pricing with dedicated support and SLA.
+Yes, contact hello@frametap.io for custom pricing with dedicated support and SLA.

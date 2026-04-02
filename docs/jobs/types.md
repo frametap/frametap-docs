@@ -1,330 +1,179 @@
 # Job Types
 
-Frametap supports different job types for various capture and upload needs.
+Jobs are the main execution primitive in Frametap. They tell a runner what to capture, upload, or watch.
+
+Use this page to understand how jobs behave. For exact request and response schemas, use the Jobs section of the API reference:
+
+- [Jobs endpoints](https://api-reference.frametap.io/#tag/jobs)
 
 ## Overview
 
-```typescript
-type JobType = 'recording' | 'screenshot' | 'stream' | 'file_upload'
-```
+Frametap currently revolves around three public job types:
+
+| Job Type | What it does | Usually started from |
+|----------|--------------|----------------------|
+| `recording` | Captures a video from a display | App or API |
+| `screenshot` | Captures a single frame from a display | App or API |
+| `file_upload` | Uploads files that appear in a watched directory | Runner watch-folder config |
 
 ## Recording Jobs
 
-Capture video from a display.
+Recording jobs capture a video from a specific display on a runner.
 
-### API Endpoint
+Use recordings when you want:
 
-```http
-POST /v1/jobs
-```
+- browser test replays
+- CI debugging
+- interactive repro videos
+- visual proof from remote machines or sandboxes
 
-### Request Body
+Recording jobs are the most configurable job type because they support multiple stop conditions.
 
-```json
-{
-  "runnerId": 123,
-  "type": "recording",
-  "displayId": ":0",
-  "name": "My Recording",
-  "stopCondition": "duration",
-  "stopConditionConfig": {
-    "durationSeconds": 60
-  },
-  "projectId": 456
-}
-```
+Supported stop conditions:
 
-### Fields
+- `duration`
+- `interrupt`
+- `selenium_idle`
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `runnerId` | integer | Yes | ID of runner to use |
-| `type` | string | Yes | `"recording"` |
-| `displayId` | string | Yes | Display to capture (e.g., `:0`, `:99`) |
-| `name` | string | No | Human-readable name |
-| `stopCondition` | string | Yes | `duration`, `interrupt`, or `selenium_idle` |
-| `stopConditionConfig` | object | Yes | Configuration for stop condition |
-| `projectId` | integer | No | Project to associate with |
-| `recordAudio` | boolean | No | Whether to record audio (default: false) |
-
-### CLI Usage
-
-Auto-record mode:
-```bash
-export FRAMETAP_AUTO_RECORD=true
-frametap up
-```
+See [Stop Conditions](/jobs/stop-conditions) for details.
 
 ## Screenshot Jobs
 
-Capture a single frame from a display.
+Screenshot jobs capture a single still image from a display.
 
-### API Endpoint
+Use screenshots when you want:
 
-```http
-POST /v1/jobs
-```
+- one-off visual checks
+- lightweight monitoring
+- scheduled snapshots
+- fast captures without recording video
 
-### Request Body
-
-```json
-{
-  "runnerId": 123,
-  "type": "screenshot",
-  "displayId": ":0",
-  "name": "Login Page",
-  "projectId": 456
-}
-```
-
-### Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `runnerId` | integer | Yes | ID of runner to use |
-| `type` | string | Yes | `"screenshot"` |
-| `displayId` | string | Yes | Display to capture |
-| `name` | string | No | Human-readable name |
-| `projectId` | integer | No | Project to associate with |
-
-### Scheduled Screenshots
-
-For periodic captures:
-
-```json
-{
-  "runnerId": 123,
-  "type": "screenshot",
-  "displayId": ":0",
-  "name": "Periodic Capture",
-  "scheduleIntervalS": 300,
-  "scheduleEndAt": "2026-12-31T23:59:59Z"
-}
-```
+Screenshots are the simplest Frametap job type and are commonly used either manually in [Jobs](https://frametap.io/app/jobs) or programmatically through the API.
 
 ## File Upload Jobs
 
-Upload files from watch folder or trigger manual uploads.
+`file_upload` is still a Frametap job type, but it is typically triggered by the runner watching a directory for new files instead of being created manually like a recording or screenshot.
 
-### API Endpoint
+When a watched file appears, Frametap processes it as an upload job and the resulting artifact appears in [Recordings](https://frametap.io/app/recordings) alongside recordings and screenshots.
 
-```http
-POST /v1/jobs
-```
+The usual way to trigger file uploads is to configure a watch folder on the runner:
 
-### Request Body
-
-```json
-{
-  "runnerId": 123,
-  "type": "file_upload",
-  "name": "Artifact Upload",
-  "includePatterns": ["*.png", "*.mp4", "*.log"],
-  "excludePatterns": ["*.tmp"],
-  "projectId": 456
-}
-```
-
-### Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `runnerId` | integer | Yes | ID of runner to use |
-| `type` | string | Yes | `"file_upload"` |
-| `name` | string | No | Human-readable name |
-| `includePatterns` | string[] | No | Glob patterns to include |
-| `excludePatterns` | string[] | No | Glob patterns to exclude |
-| `projectId` | integer | No | Project to associate with |
-
-### CLI Usage
-
-Setup watch folder:
 ```bash
 frametap watch start --dir /app/output --exclude "*.tmp"
 ```
 
-Or via environment:
+Or via environment variables:
+
 ```bash
 export FRAMETAP_WATCH_DIR=/app/output
 export FRAMETAP_WATCH_EXCLUDE="[*.tmp, *.log]"
 frametap up
 ```
 
-## Stream Jobs
+See [Watch Folder](/jobs/watch-folder) for the full workflow.
 
-Create a live stream from a display.
+## One-Time vs Recurring Jobs
 
-### API Endpoint
+Frametap jobs can run once or on a recurring interval.
 
-```http
-POST /v1/jobs
-```
+In [Jobs](https://frametap.io/app/jobs), the create-job flow lets users choose:
 
-### Request Body
+- `once`
+- `recurring`
 
-```json
-{
-  "runnerId": 123,
-  "type": "stream",
-  "name": "Live View",
-  "record": true,
-  "projectId": 456
-}
-```
+Recurring jobs are useful for:
 
-### Fields
+- periodic screenshots
+- repeated health checks
+- regular recordings on a schedule
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `runnerId` | integer | Yes | ID of runner to use |
-| `type` | string | Yes | `"stream"` |
-| `name` | string | No | Human-readable name |
-| `record` | boolean | No | Also record the stream |
-| `projectId` | integer | No | Project to associate with |
+For recurring jobs:
 
-## Job Status
+- the job repeats on a configured interval
+- you can optionally define an end time
+- recurring recordings use a fixed duration rather than manual interrupt
 
-Jobs progress through these statuses:
+If you need exact scheduling fields and payloads, use the create-job endpoint in the API reference.
 
-```typescript
-type JobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled'
-```
+## Stop Conditions
 
-- **`queued`** - Waiting for runner assignment
-- **`running`** - Actively executing
-- **`completed`** - Successfully finished
-- **`failed`** - Error occurred
-- **`cancelled`** - Manually cancelled
+Only recording jobs use stop conditions.
 
-### Check Status
+The main choices are:
 
-```bash
-curl https://api.frametap.io/v1/jobs/123 \
-  -H "Authorization: Bearer $API_KEY"
-```
+- `duration` for fixed-length recordings
+- `interrupt` for recordings you stop manually
+- `selenium_idle` for Selenium-based automation
 
-## Job Events
-
-Each job generates events for tracking progress:
-
-### Recording Events
-
-| Event | Description |
-|-------|-------------|
-| `job_started` | Job execution began |
-| `recording_started` | Video capture began |
-| `recording_uploading` | Video upload in progress |
-| `recording_completed` | Video captured successfully |
-| `recording_failed` | Capture or upload failed |
-| `job_completed` | Job finished successfully |
-| `job_failed` | Job failed |
-| `job_cancelled` | Job was cancelled |
-
-### Screenshot Events
-
-| Event | Description |
-|-------|-------------|
-| `screenshot_capturing` | Screenshot in progress |
-| `screenshot_captured` | Screenshot saved |
-| `screenshot_failed` | Capture failed |
-
-### File Upload Events
-
-| Event | Description |
-|-------|-------------|
-| `file_uploading` | File upload started |
-| `file_uploaded` | File uploaded successfully |
-| `file_failed` | Upload failed |
-
-### Get Events
-
-```bash
-curl https://api.frametap.io/v1/jobs/123/events \
-  -H "Authorization: Bearer $API_KEY"
-```
+See [Stop Conditions](/jobs/stop-conditions) for examples and behavior details.
 
 ## Cancelling Jobs
 
-### Cancel Running Job
+Running jobs can be cancelled in two main ways:
 
-```bash
-curl -X POST https://api.frametap.io/v1/jobs/123/cancel \
-  -H "Authorization: Bearer $API_KEY"
-```
+### In the App
 
-### Delete Job
+1. Open [Jobs](https://frametap.io/app/jobs)
+2. Click the `...` action for the running job
+3. Open the drawer
+4. Click the cancel button at the top
 
-```bash
-curl -X DELETE https://api.frametap.io/v1/jobs/123 \
-  -H "Authorization: Bearer $API_KEY"
-```
+### Via API
 
-## Listing Jobs
+Use the API reference for the exact cancel endpoint and request shape:
 
-```bash
-# List all jobs
-curl https://api.frametap.io/v1/jobs \
-  -H "Authorization: Bearer $API_KEY"
+- [Cancel job endpoint](https://api-reference.frametap.io/#tag/jobs/POST/v1/jobs/{id}/cancel)
 
-# Filter by status
-curl "https://api.frametap.io/v1/jobs?status=running" \
-  -H "Authorization: Bearer $API_KEY"
+This is especially relevant for `interrupt` recordings, which keep running until they are manually stopped.
 
-# Filter by type
-curl "https://api.frametap.io/v1/jobs?jobType=recording" \
-  -H "Authorization: Bearer $API_KEY"
+## Job Status
 
-# Filter by runner
-curl "https://api.frametap.io/v1/jobs?runnerId=123" \
-  -H "Authorization: Bearer $API_KEY"
-```
+Jobs move through a small set of lifecycle states:
 
-## Examples
+- `queued`
+- `running`
+- `completed`
+- `failed`
+- `cancelled`
 
-### Basic Recording
+These states appear in [Jobs](https://frametap.io/app/jobs) and through the API.
 
-```bash
-curl -X POST https://api.frametap.io/v1/jobs \
-  -H "Authorization: Bearer $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "runnerId": 123,
-    "type": "recording",
-    "displayId": ":0",
-    "name": "Demo Recording",
-    "stopCondition": "duration",
-    "stopConditionConfig": {
-      "durationSeconds": 120
-    }
-  }'
-```
+## Job Events
 
-### Screenshot
+Each job also emits progress events.
 
-```bash
-curl -X POST https://api.frametap.io/v1/jobs \
-  -H "Authorization: Bearer $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "runnerId": 123,
-    "type": "screenshot",
-    "displayId": ":0",
-    "name": "Homepage"
-  }'
-```
+Examples:
 
-### Scheduled Screenshots
+- recordings emit events like recording started, uploading, completed, or failed
+- screenshots emit capture and failure events
+- file uploads emit upload progress and completion events
 
-```bash
-curl -X POST https://api.frametap.io/v1/jobs \
-  -H "Authorization: Bearer $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "runnerId": 123,
-    "type": "screenshot",
-    "displayId": ":0",
-    "name": "Health Check",
-    "scheduleIntervalS": 300,
-    "scheduleEndAt": "2026-12-31T23:59:59Z"
-  }'
-```
+These are useful when building automation or troubleshooting a workflow.
+
+## Where to Use Which Surface
+
+### Use the App when you want to:
+
+- create one-off jobs quickly
+- inspect runner and display choices visually
+- stop running jobs manually
+- browse recordings, screenshots, and uploaded files
+
+### Use the API when you want to:
+
+- create recordings and screenshots programmatically
+- schedule recurring jobs from your own tooling
+- list, filter, cancel, or inspect jobs from automation
+
+### Use the CLI when you want to:
+
+- configure watch folders
+- manage local runner state
+- set up auto-record behavior on the runner itself
+
+## Related Pages
+
+- [Stop Conditions](/jobs/stop-conditions)
+- [Watch Folder](/jobs/watch-folder)
+- [API Overview](/api/overview)
+- [Jobs endpoints](https://api-reference.frametap.io/#tag/jobs)

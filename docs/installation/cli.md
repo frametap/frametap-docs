@@ -1,19 +1,19 @@
 # Installing the Frametap CLI
 
-The Frametap CLI (`frametap`) is a Go-based tool that runs on your machines to capture screens and communicate with the Frametap platform.
+The Frametap CLI installs the runner that connects a machine to Frametap. It includes the `frametap` command-line tool and the `frametapd` daemon that stays connected and executes jobs.
 
 ## Quick Install
 
 ### macOS and Linux
 
 ```bash
-curl -fsSL https://cli.frametap.io/install | bash
+curl -fsSL https://cli.static.frametap.io/install | bash
 ```
 
 ## Docker Image
 
 ```bash
-docker pull frametap/frametap-cli:latest
+docker pull frametap/frametap:latest
 ```
 
 ## First Steps
@@ -22,7 +22,7 @@ docker pull frametap/frametap-cli:latest
 
 1. Log in to [frametap.io](https://frametap.io)
 2. Go to [Settings → API Keys](https://frametap.io/app/settings/)
-3. Create an enrollment key or copy an existing one
+3. Create or copy a **Runner Enrollment Key**
 4. The token looks like: `ft_enrollment_xxxxxxxxxxxxxxxxx`
 
 ### 2. Enroll Your Runner
@@ -43,30 +43,30 @@ Options:
 frametap status
 
 # List available displays
-frametap screens
-
-# List windows (Linux only, requires wmctrl)
-frametap windows
+frametap displays
 ```
+
+After enrollment, the runner should appear in [Runners](https://frametap.io/app/runners).
 
 ## Directory Structure
 
-The CLI stores data in:
+The runner stores its local state in:
 
-- **Config**: `~/.config/frametap/` (Linux) or `~/Library/Application Support/frametap/` (macOS)
-- **Data**: `~/.local/share/frametap/` (Linux) or `~/Library/Application Support/frametap/` (macOS)
+- Linux: `~/.config/frametap/`
+- macOS: `~/Library/Application Support/frametap/`
 
 Key files:
 - `runner.json` - Runner registration data (token, runnerId)
-- `watcher.json` - Watch folder configuration
-- `checksums.json` - Checksum database for deduplication
+- `daemon.sock` - Local CLI-to-daemon socket
+- `frametapd.log` - Daemon log output
+- `watch-checksums.json` - Watch-folder deduplication database
 
 ## Updating
 
 Re-run the install command:
 
 ```bash
-curl -fsSL https://cli.frametap.io/install | bash
+curl -fsSL https://cli.static.frametap.io/install | bash
 ```
 
 The installer will replace the existing binary.
@@ -74,8 +74,11 @@ The installer will replace the existing binary.
 ## Uninstalling
 
 ```bash
-# Stop and unenroll
+# Stop the daemon
 frametap down
+
+# Or stop and clear runner credentials
+frametap logout
 
 # Remove binaries
 rm /usr/local/bin/frametap
@@ -83,7 +86,6 @@ rm /usr/local/bin/frametapd
 
 # Remove data (optional)
 rm -rf ~/.config/frametap
-rm -rf ~/.local/share/frametap
 ```
 
 ## Troubleshooting
@@ -99,7 +101,7 @@ rm -rf ~/.local/share/frametap
 ### "Cannot connect to daemon"
 - Check if daemon is running: `frametap status`
 - Start manually: `frametap daemon start`
-- Check logs in `~/.local/share/frametap/daemon.log`
+- Check logs in `~/.config/frametap/frametapd.log`
 
 ### Permission Denied (watch folder)
 - The watch folder path must be absolute

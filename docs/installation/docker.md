@@ -1,6 +1,19 @@
 # Docker Setup
 
-Frametap can run inside Docker containers to capture screens from within isolated environments.
+Use `frametap/frametap` when you want to run the Frametap runner inside Docker.
+
+Docker image:
+
+- [frametap/frametap on Docker Hub](https://hub.docker.com/r/frametap/frametap)
+
+The image is best suited for:
+
+- Selenium and browser automation containers
+- CI jobs that need recordings or screenshots
+- sandboxed or ephemeral environments
+- watch-folder uploads from generated artifacts
+
+The most common Docker setup is a sidecar next to Selenium, where Frametap connects to the Selenium display, records the browser session, and uploads the result.
 
 ## Basic Docker Run
 
@@ -9,7 +22,7 @@ docker run -d \
   --name frametap \
   -e FRAMETAP_TOKEN=ft_enrollment_xxxxxxxxxxxxxxxxx \
   -e FRAMETAP_AUTO_RECORD=true \
-  frametap/frametap-cli:latest
+  frametap/frametap:latest
 ```
 
 ## Docker Compose
@@ -20,7 +33,9 @@ docker run -d \
 version: '3.8'
 services:
   frametap:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
+    env_file:
+      - .env
     environment:
       - FRAMETAP_TOKEN=${FRAMETAP_TOKEN}
       - FRAMETAP_AUTO_RECORD=${FRAMETAP_AUTO_RECORD:-false}
@@ -34,11 +49,14 @@ volumes:
 
 ### With Selenium (Full Stack)
 
+This is the recommended example if you want to understand how the image is typically used in practice.
+
 ```yaml
 version: '3.8'
 services:
   selenium:
     image: selenium/standalone-chrome:latest
+    platform: linux/amd64
     shm_size: 2gb
     environment:
       - SE_NODE_MAX_SESSIONS=1
@@ -53,13 +71,17 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+      start_period: 10s
 
   frametap:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
+    env_file:
+      - .env
     environment:
       - FRAMETAP_TOKEN=${FRAMETAP_TOKEN}
       - FRAMETAP_AUTO_RECORD=true
-      - FRAMETAP_JOB_NAME=Selenium Docker Test
+      - 'FRAMETAP_JOB_NAME=${FRAMETAP_JOB_NAME:-selenium CI: Email Validation Failure Recording}'
+      - FRAMETAP_HOSTNAME=${FRAMETAP_HOSTNAME:-selenium CI}
       - SE_GRID_URL=http://selenium:4444
       - DISPLAY=selenium:99
     depends_on:
@@ -67,18 +89,21 @@ services:
     volumes:
       - frametap-data:/home/frametap/.config/frametap
 
-  test:
+  selenium-test:
     build:
       context: .
-      dockerfile: Dockerfile.test
+      dockerfile: Dockerfile.selenium
     environment:
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
+      - SELENIUM_DEMO_RUNNER_NAME=${FRAMETAP_HOSTNAME:-selenium CI}
     depends_on:
       selenium:
         condition: service_healthy
+      frametap:
+        condition: service_started
     volumes:
-      - ./tests:/tests
-    command: ["python", "test.py"]
+      - ./:/tests
+    command: ["python", "selenium_test.py"]
 
 volumes:
   frametap-data:
@@ -88,8 +113,21 @@ Environment file (`.env`):
 ```
 FRAMETAP_TOKEN=ft_enrollment_xxxxxxxxxxxxxxxxx
 FRAMETAP_AUTO_RECORD=true
-FRAMETAP_JOB_NAME=Selenium Docker Test
+FRAMETAP_JOB_NAME=selenium CI: Email Validation Failure Recording
+FRAMETAP_HOSTNAME=selenium CI
 ```
+
+How this works:
+
+1. `selenium` provides the browser and X11 display
+2. `frametap` connects to that display with `DISPLAY=selenium:99`
+3. `FRAMETAP_AUTO_RECORD=true` starts recording automatically
+4. `SE_GRID_URL=http://selenium:4444` lets Frametap stop based on Selenium activity
+5. the named volume preserves runner state across container restarts
+
+If you are running Docker on Apple Silicon but using the Selenium standalone Chrome image, `platform: linux/amd64` helps keep the environment consistent.
+
+For a more complete walkthrough, see [Selenium Integration](/installation/selenium).
 
 ## Key Environment Variables
 
@@ -149,7 +187,9 @@ To auto-upload files from a container directory:
 ```yaml
 services:
   frametap:
-    image: frametap/frametap-cli:latest
+    image: frametap/frametap:latest
+    env_file:
+      - .env
     environment:
       - FRAMETAP_TOKEN=${FRAMETAP_TOKEN}
       - FRAMETAP_WATCH_DIR=/app/output
@@ -162,86 +202,6 @@ Requirements:
 - Path must be absolute
 - Mount as read-only (`:ro`) if the runner shouldn't modify files
 - Directory must not contain symlinks
-
-## Building Custom Image
-
-```dockerfile
-FROM frametap/frametap-cli:latest
-
-# Add custom tools
-RUN apt-get update && apt-get install -y \
-    curl \
-    jq \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy custom scripts
-COPY scripts/ /usr/local/bin/
-
-# Set custom environment
-ENV FRAMETAP_JOB_NAME="Custom Docker Runner"
-
-ENTRYPOINT ["frametapd"]
-```
-
-Build and run:
-```bash
-docker build -t my-frametap .
-docker run -e FRAMETAP_TOKEN=<token> my-frametap
-```
-
-## Health Checks
-
-Add health checks to your compose:
-
-```yaml
-services:
-  frametap:
-    image: frametap/frametap-cli:latest
-    healthcheck:
-      test: ["CMD", "frametap", "status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-```
-
-## Kubernetes
-
-Example sidecar configuration:
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: test-pod
-spec:
-  containers:
-    - name: app
-      image: my-app:latest
-      env:
-        - name: DISPLAY
-          value: ":99"
-    
-    - name: frametap
-      image: frametap/frametap-cli:latest
-      env:
-        - name: FRAMETAP_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: frametap-token
-              key: token
-        - name: FRAMETAP_AUTO_RECORD
-          value: "true"
-        - name: DISPLAY
-          value: ":99"
-      volumeMounts:
-        - name: frametap-data
-          mountPath: /home/frametap/.config/frametap
-  
-  volumes:
-    - name: frametap-data
-      emptyDir: {}
-```
 
 ## Troubleshooting
 
@@ -259,3 +219,4 @@ spec:
 - Check watch path is absolute
 - Verify volume mounts are correct
 - Check checksum deduplication (files already uploaded won't re-upload)
+- Check whether the file exceeds the upload limit for your plan; if so, Frametap shows a notification in the app when the upload is triggered

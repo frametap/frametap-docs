@@ -1,6 +1,6 @@
 # CLI Commands Reference
 
-The Frametap CLI provides commands for managing runners, controlling capture jobs, and monitoring status.
+The Frametap CLI is how you install, enroll, inspect, and manage a Frametap runner locally.
 
 ## Overview
 
@@ -37,7 +37,7 @@ frametap up --token <token> [flags]
 ```
 
 **Flags:**
-- `--token <token>` - Enrollment token (required)
+- `--token <token>` - Enrollment token (or use `FRAMETAP_TOKEN`)
 - `--hostname <name>` - Custom runner name (default: OS hostname)
 - `--watch <path>` - Absolute path to watch folder
 - `--yes` - Skip confirmation prompts
@@ -55,32 +55,39 @@ frametap up --token ft_enrollment_xxxxxxxx \
 ```
 
 **Behavior:**
-- Validates token immediately via `POST /v1/runners/register`
+- Validates the token immediately
 - Exits with error if token is invalid or expired
-- Starts daemon if not already running
+- Starts `frametapd` in the background if not already running
 - Idempotent: safe to run multiple times with same token
 
 ### `frametap down`
 
-Unenroll runner and stop daemon.
+Stop the daemon while preserving runner credentials.
 
 ```bash
 frametap down
 ```
 
 **Behavior:**
-- Unregisters runner from backend
 - Stops daemon process
-- Preserves local data files (can re-enroll later)
+- Keeps the stored runner so `frametap up` can reconnect later
 
-## Screen & Window Commands
+### `frametap logout`
 
-### `frametap screens`
+Stop the daemon and clear stored runner credentials.
+
+```bash
+frametap logout
+```
+
+## Display Commands
+
+### `frametap displays`
 
 List available displays.
 
 ```bash
-frametap screens
+frametap displays
 ```
 
 Output:
@@ -90,46 +97,7 @@ Display ID    Resolution    Primary
 :1            1280x720
 ```
 
-Use the Display ID when creating capture jobs.
-
-### `frametap windows`
-
-List windows (Linux only, requires `wmctrl`).
-
-```bash
-frametap windows
-```
-
-Output:
-```
-Window ID     Title
-0x0123456     Chrome - My App
-0x0789012     Terminal
-```
-
-## Upload Command
-
-### `frametap upload`
-
-Upload a file to a presigned URL.
-
-```bash
-frametap upload --url <presigned-url> --file <path> [flags]
-```
-
-**Flags:**
-- `--url <url>` - Presigned upload URL (required)
-- `--file <path>` - File to upload (required)
-- `--content-type <mime>` - MIME type (optional)
-- `--header <key:value>` - Custom headers (repeatable)
-
-**Example:**
-```bash
-frametap upload \
-  --url "https://s3.amazonaws.com/..." \
-  --file /tmp/recording.mp4 \
-  --content-type video/mp4
-```
+Use the Display ID when creating jobs in [Jobs](https://frametap.io/app/jobs) or through the API.
 
 ## Watch Folder Commands
 
@@ -202,7 +170,7 @@ frametap daemon socket
 
 Output:
 ```
-/run/user/1000/frametap.sock
+~/.config/frametap/daemon.sock
 ```
 
 ## Exit Codes
@@ -218,46 +186,11 @@ Output:
 | 6 | File not found |
 | 7 | Network error |
 
-## JSON-RPC Protocol
+## Related Pages
 
-The CLI communicates with the daemon via JSON-RPC over a UNIX socket.
-
-### IPC Methods
-
-**`status`** - Get daemon status
-```json
-{"method": "status", "params": []}
-```
-
-**`screens`** - List displays
-```json
-{"method": "screens", "params": []}
-```
-
-**`windows`** - List windows
-```json
-{"method": "windows", "params": []}
-```
-
-**`watch.start`** - Start watcher
-```json
-{"method": "watch.start", "params": {"dir": "/app/output", "exclude": ["*.log"]}}
-```
-
-**`watch.stop`** - Stop watcher
-```json
-{"method": "watch.stop", "params": []}
-```
-
-**`watch.status`** - Get watch status
-```json
-{"method": "watch.status", "params": []}
-```
-
-**`shutdown`** - Stop daemon
-```json
-{"method": "shutdown", "params": []}
-```
+- [Install CLI](/installation/cli)
+- [Environment Variables](/cli/environment)
+- [Using the App](/overview/app)
 
 ## Tips
 
