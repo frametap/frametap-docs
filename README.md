@@ -34,8 +34,7 @@ Found an issue or have a suggestion? We'd love to hear from you!
 
 - **Email**: hello@frametap.io
 - **Documentation**: [docs.frametap.io](https://docs.frametap.io)
-- **API Reference**: [frametap.io/api](https://frametap.io/api)
-- **Status**: [status.frametap.io](https://status.frametap.io)
+- **API Reference**: [api-reference.frametap.io](http://api-reference.frametap.io/)
 
 ## License
 
