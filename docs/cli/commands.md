@@ -97,7 +97,69 @@ Display ID    Resolution    Primary
 :1            1280x720
 ```
 
-Use the Display ID when creating jobs in [Jobs](https://frametap.io/app/jobs) or through the API.
+Use the Display ID when creating jobs from the CLI, in [Jobs](https://frametap.io/app/jobs), or through the API.
+
+## Job Commands
+
+### `frametap recording start`
+
+Start a recording from the current runner.
+
+```bash
+frametap recording start [flags]
+```
+
+**Flags:**
+- `--display <id>` - Display ID from `frametap displays`
+- `--duration <seconds>` - Recording duration in seconds; automatically stops when the duration is reached
+- `--name <name>` - Optional job name
+
+**Examples:**
+```bash
+# Start an interrupt recording on the default display
+frametap recording start --name "Manual repro"
+
+# Record display :0 for 30 seconds
+frametap recording start \
+  --display :0 \
+  --duration 30 \
+  --name "Checkout smoke test"
+```
+
+If you omit `--duration`, the recording runs as an interrupt recording until you stop it.
+
+### `frametap recording stop`
+
+Stop the active interrupt recording on the current runner.
+
+```bash
+frametap recording stop
+```
+
+Use this for recordings started with `frametap recording start` without `--duration`.
+
+### `frametap screenshot`
+
+Capture a screenshot from the current runner.
+
+```bash
+frametap screenshot [flags]
+```
+
+**Flags:**
+- `--display <id>` - Display ID from `frametap displays`
+- `--name <name>` - Optional job name
+
+**Examples:**
+```bash
+# Capture the default display
+frametap screenshot --name "Before checkout"
+
+# Capture a specific display
+frametap screenshot --display :0 --name "Dashboard state"
+```
+
+Recording and screenshot commands require the runner daemon to be enrolled and running. Use `frametap status` to confirm the runner is online before starting a job.
 
 ## Watch Folder Commands
 

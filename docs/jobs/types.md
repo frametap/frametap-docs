@@ -12,8 +12,8 @@ Frametap currently revolves around three public job types:
 
 | Job Type | What it does | Usually started from |
 |----------|--------------|----------------------|
-| `recording` | Captures a video from a display | App or API |
-| `screenshot` | Captures a single frame from a display | App or API |
+| `recording` | Captures a video from a display | App, CLI, or API |
+| `screenshot` | Captures a single frame from a display | App, CLI, or API |
 | `file_upload` | Uploads files that appear in a watched directory | Runner watch-folder config |
 
 ## Recording Jobs
@@ -28,6 +28,18 @@ Use recordings when you want:
 - visual proof from remote machines or sandboxes
 
 Recording jobs are the most configurable job type because they support multiple stop conditions.
+
+You can start a recording directly from the runner with the CLI:
+
+```bash
+frametap recording start --display :0 --duration 30 --name "Checkout smoke test"
+```
+
+If you omit `--duration`, the recording runs as an interrupt recording until you stop it:
+
+```bash
+frametap recording stop
+```
 
 Supported stop conditions:
 
@@ -48,7 +60,11 @@ Use screenshots when you want:
 - scheduled snapshots
 - fast captures without recording video
 
-Screenshots are the simplest Frametap job type and are commonly used either manually in [Jobs](https://frametap.io/app/jobs) or programmatically through the API.
+Screenshots are the simplest Frametap job type and are commonly used manually in [Jobs](https://frametap.io/app/jobs), directly from a runner with the CLI, or programmatically through the API.
+
+```bash
+frametap screenshot --display :0 --name "Dashboard state"
+```
 
 ## File Upload Jobs
 
@@ -109,7 +125,7 @@ See [Stop Conditions](/jobs/stop-conditions) for examples and behavior details.
 
 ## Cancelling Jobs
 
-Running jobs can be cancelled in two main ways:
+Running jobs can be cancelled in a few ways:
 
 ### In the App
 
@@ -125,6 +141,14 @@ Use the API reference for the exact cancel endpoint and request shape:
 - [Cancel job endpoint](https://api-reference.frametap.io/#tag/jobs/POST/v1/jobs/{id}/cancel)
 
 This is especially relevant for `interrupt` recordings, which keep running until they are manually stopped.
+
+### Via CLI
+
+If you started an interrupt recording from the runner CLI, stop it from the same runner:
+
+```bash
+frametap recording stop
+```
 
 ## Job Status
 
@@ -167,6 +191,7 @@ These are useful when building automation or troubleshooting a workflow.
 
 ### Use the CLI when you want to:
 
+- start one-off recordings or screenshots from the runner itself
 - configure watch folders
 - manage local runner state
 - set up auto-record behavior on the runner itself
@@ -174,6 +199,7 @@ These are useful when building automation or troubleshooting a workflow.
 ## Related Pages
 
 - [Stop Conditions](/jobs/stop-conditions)
+- [CLI Commands](/cli/commands)
 - [Watch Folder](/jobs/watch-folder)
 - [API Overview](/api/overview)
 - [Jobs endpoints](https://api-reference.frametap.io/#tag/jobs)

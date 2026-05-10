@@ -42,15 +42,40 @@ The easiest way to trigger your first recording is directly from the app:
 1. Go to [frametap.io/app](https://frametap.io/app)
 2. Confirm your runner is ready in [Runners](https://frametap.io/app/runners)
 3. Navigate to [Jobs](https://frametap.io/app/jobs)
-3. Click "Create Job"
-4. Select the runner, display, and job type
-5. Choose one-time or recurring execution
-6. For recordings, choose the stop condition
-7. Click "Start"
+4. Click "Create Job"
+5. Select the runner, display, and job type
+6. Choose one-time or recurring execution
+7. For recordings, choose the stop condition
+8. Click "Start"
 
 Your runner will immediately start recording and upload the result.
 
-### Option B: Via API
+### Option B: Via CLI
+
+If you are already on the runner machine, start a recording directly from the CLI:
+
+```bash
+# Optional: inspect display IDs first
+frametap displays
+
+# Record the default display for 30 seconds
+frametap recording start --duration 30 --name "First Recording"
+```
+
+For an interrupt recording that you stop manually, omit `--duration`:
+
+```bash
+frametap recording start --name "Manual Recording"
+frametap recording stop
+```
+
+You can also capture a screenshot directly from the runner:
+
+```bash
+frametap screenshot --name "First Screenshot"
+```
+
+### Option C: Via API
 
 ::: info Prerequisites for API Control
 Before using the API, create an access key:
@@ -86,7 +111,7 @@ curl -X POST "https://api.frametap.io/v1/jobs?organizationId=$FRAMETAP_ORG_ID" \
   }'
 ```
 
-### Option C: Auto-Record Mode
+### Option D: Auto-Record Mode
 
 Set the `FRAMETAP_AUTO_RECORD` environment variable:
 
@@ -100,7 +125,7 @@ frametap up
 
 The runner will automatically start recording when it starts up.
 
-### Option D: Selenium in Docker
+### Option E: Selenium in Docker
 
 If you run browser automation in containers, use the Docker image with Selenium.
 
