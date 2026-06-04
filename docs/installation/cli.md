@@ -34,7 +34,7 @@ frametap up --token ft_enrollment_xxxxxxxxxxxxxxxxx
 Options:
 - `--hostname <name>` - Custom runner name (default: OS hostname)
 - `--watch <path>` - Set up watch folder at enrollment time
-- `--yes` - Skip confirmations
+- `--yes` - Only used with `--watch`; accepts watch-folder warnings, such as prompts about uploading many existing files
 
 ### 3. Verify Installation
 

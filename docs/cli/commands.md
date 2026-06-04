@@ -40,7 +40,7 @@ frametap up --token <token> [flags]
 - `--token <token>` - Enrollment token (or use `FRAMETAP_TOKEN`)
 - `--hostname <name>` - Custom runner name (default: OS hostname)
 - `--watch <path>` - Absolute path to watch folder
-- `--yes` - Skip confirmation prompts
+- `--yes` - Only used with `--watch`; accepts watch-folder warnings, such as prompts about uploading many existing files
 
 **Examples:**
 ```bash
@@ -174,7 +174,7 @@ frametap watch start --dir <path> [flags]
 **Flags:**
 - `--dir <path>` - Absolute path to watch (required)
 - `--exclude <glob>` - Exclude pattern (repeatable)
-- `--yes` - Skip confirmation
+- `--yes` - Accept watch-folder warnings, such as prompts about uploading many existing files
 
 **Example:**
 ```bash
