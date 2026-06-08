@@ -15,6 +15,8 @@ Frametap enables developers to programmatically capture screenshots, screen reco
 
 Visit the live documentation at [docs.frametap.io](https://docs.frametap.io)
 
+Agent/LLM integrations can use the Frametap Agent Skill at [`skill/SKILL.md`](skill/SKILL.md).
+
 Or run it locally:
 
 ```bash

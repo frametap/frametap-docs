@@ -82,7 +82,8 @@ export default defineConfig({
         text: 'Reference',
         collapsed: false,
         items: [
-          { text: 'API Reference', link: '/reference/api-spec' }
+          { text: 'API Reference', link: '/reference/api-spec' },
+          { text: 'Agent Skill', link: '/llms/skill' }
         ]
       }
     ],
