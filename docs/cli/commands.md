@@ -2,6 +2,10 @@
 
 The Frametap CLI is how you install, enroll, inspect, and manage a Frametap runner locally.
 
+::: tip Using an LLM or coding agent?
+Load the [Frametap Agent Skill](/llms/skill) or the raw [`skill/SKILL.md`](https://github.com/frametap/frametap-docs/blob/main/skill/SKILL.md) file for a compact agent-ready reference to Frametap CLI, API, runner, and capture workflows.
+:::
+
 ## Overview
 
 ```
@@ -253,6 +257,7 @@ Output:
 - [Install CLI](/installation/cli)
 - [Environment Variables](/cli/environment)
 - [Using the App](/overview/app)
+- [Frametap Agent Skill](/llms/skill)
 
 ## Tips
 

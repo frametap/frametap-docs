@@ -2,6 +2,10 @@
 
 The Frametap CLI installs the runner that connects a machine to Frametap. It includes the `frametap` command-line tool and the `frametapd` daemon that stays connected and executes jobs.
 
+::: tip Using an LLM or coding agent?
+Load the [Frametap Agent Skill](/llms/skill) or the raw [`skill/SKILL.md`](https://github.com/frametap/frametap-docs/blob/main/skill/SKILL.md) file so your agent has the current runner, CLI, API, and troubleshooting workflow.
+:::
+
 ## Quick Install
 
 ### macOS and Linux
@@ -113,3 +117,4 @@ rm -rf ~/.config/frametap
 - [Docker setup](/installation/docker)
 - [CLI commands](/cli/commands)
 - [Environment variables](/cli/environment)
+- [Frametap Agent Skill](/llms/skill)

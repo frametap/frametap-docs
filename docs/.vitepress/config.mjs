@@ -20,6 +20,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Documentation', link: '/overview/' },
+      { text: 'Agent Skill', link: '/llms/skill' },
       { text: 'Open App', link: 'https://frametap.io/app' },
       { text: 'API Reference', link: 'https://api-reference.frametap.io/' }
     ],
