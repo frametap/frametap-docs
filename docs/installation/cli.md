@@ -20,6 +20,8 @@ curl -fsSL https://cli.static.frametap.io/install | bash
 docker pull frametap/frametap:latest
 ```
 
+Read more on Docker Hub: [frametap/frametap](https://hub.docker.com/r/frametap/frametap)
+
 ## First Steps
 
 ### 1. Get an Enrollment Token
